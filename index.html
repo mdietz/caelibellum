@@ -1,0 +1,563 @@
+<html>
+<head>
+<script src="static/jquery-1.8.2.min.js"></script>
+<script src="static/jquery.tablesorter.min.js"></script>
+<script src="static/prettify.js"></script>
+<script src="static/application.js"></script>
+<script type="application/javascript" src="static/Three.js"></script>
+<script type="text/javascript" src="static/RequestAnimationFrame.js"></script> 
+<script type="text/javascript" src="static/Detector.js"></script>
+<script type="text/javascript" src="static/RenderPass.js"></script>
+    <script type="text/javascript" src="static/BloomPass.js"></script>
+    <script type="text/javascript" src="static/FilmPass.js"></script>
+     <script type="text/javascript" src="static/ShaderExtras.js"></script>
+    <script type="text/javascript" src="static/EffectComposer.js"></script>
+     <script type="text/javascript" src="static/ShaderPass.js"></script>
+     <script type="text/javascript" src="static/MaskPass.js"></script>
+
+
+<link rel="stylesheet" type="text/css" href="static/bootstrap-1.2.0.min.css">
+<link rel="stylesheet" type="text/css" href="static/prettify.css">
+
+
+<script type="text/javascript">
+    var star_material = new THREE.MeshLambertMaterial({
+	    color: 0xffff00,
+	//map: THREE.ImageUtils.loadTexture('images/sunmap.jpg'), 
+	    blending: THREE.AdditiveBlending,
+	    shading: THREE.SmoothShading
+	});
+
+    function Moon(name, parent){
+	this.name = name;
+	this.parent = parent;
+	this.mesh = null;
+	this.spin_rate = 0;
+	this.rotation_rate = 0;
+	this.rotation = 0;
+	this.distance = 0;
+	this.tilt_angle = 0;
+
+	this.init = function(distance, radius, material){
+	moon_geometry = new THREE.SphereGeometry(radius, 16, 8);
+	sphere = new THREE.Mesh(moon_geometry, material);
+	
+	this.rotation = Math.random()*2*Math.PI;
+
+	this.tilt_angle = this.parent.tilt_angle + Math.random()*Math.PI/3 - Math.PI/6;
+	
+	// TOA
+	// TAN(O/A) = sphere.rotation.z
+	// O/A = arctan(sphere.rotation.z
+	// O = distance * arctan(spehere.rotation.z)
+	sphere.position.x = this.parent.mesh.position.x + distance*Math.cos(this.rotation);
+	sphere.position.y = this.parent.mesh.position.y + distance*Math.atan(sphere.rotation.x)*Math.sin(this.rotation);
+	sphere.position.z = this.parent.mesh.position.z + distance*Math.sin(this.rotation);
+	    
+	    sphere.rotation.x = this.tilt_angle;
+	    
+	this.spin_rate = 0;
+	    this.rotation_rate = .0175/(distance - parent.radius);
+	
+	    this.distance = distance;
+	this.mesh = sphere;
+    }
+
+    this.update = function(){
+	this.rotation += this.rotation_rate;
+	this.mesh.position.x = this.parent.mesh.position.x + this.distance*Math.cos(this.rotation);
+	this.mesh.position.y = this.parent.mesh.position.y + this.distance*Math.atan(this.mesh.rotation.x)*Math.sin(this.rotation);
+	this.mesh.position.z = this.parent.mesh.position.z + this.distance*Math.sin(this.rotation);
+	
+	this.mesh.rotation.x = 0;
+	this.mesh.rotation.y += this.spin_rate;
+	this.mesh.rotation.x = this.tilt_angle;
+    }
+
+    this.addToScene = function(scene){
+	scene.addObject(this.mesh);
+    }
+}
+
+function Planet(name, parent){
+    this.name = name;
+    this.radius = 0;
+    this.parent = parent;
+    this.mesh = null;
+    this.spin_rate = 0;
+    this.rotation_rate = 0;
+    this.rotation = 0;
+    this.distance = 0;
+    this.moons = [];
+    this.line = null;
+
+    this.init = function(distance, radius, material){
+
+	this.radius = radius;
+
+	planet_geometry = new THREE.SphereGeometry(radius, 32, 16);
+	sphere = new THREE.Mesh(planet_geometry, material);
+	
+	this.rotation = Math.random()*2*Math.PI;
+
+	this.tilt_angle = Math.random()*Math.PI/3 - Math.PI/6;
+	
+	// TOA
+	// TAN(O/A) = sphere.rotation.z
+	// O/A = arctan(sphere.rotation.z)
+	// O = distance * arctan(spehere.rotation.z)
+	sphere.position.x = this.parent.mesh.position.x + distance*Math.cos(this.rotation);
+	sphere.position.y = this.parent.mesh.position.y + distance*Math.atan(sphere.rotation.x)*Math.sin(this.rotation);
+	sphere.position.z = this.parent.mesh.position.z + distance*Math.sin(this.rotation);
+
+	sphere.rotation.x = this.tilt_angle;
+
+	this.spin_rate = .0175;
+	this.rotation_rate = .0175/(distance - parent.radius);
+	
+	this.distance = distance;
+
+	//material = new THREE.LineBasicMaterial( { color: 0xFFD300, opacity: 0.8, linewidth: 4 } );
+
+	//geometry = new THREE.Geometry();
+	
+	//geometry.vertices.push( new THREE.Vertex( new THREE.Vector3( 0, -50, 0 ) ) );
+	//geometry.vertices.push( new THREE.Vertex( new THREE.Vector3( 0 , sphere.position.y, 0 ) ) );
+
+	//this.line = new THREE.Line(geometry, material);
+
+	//this.line.position.x = sphere.position.x;
+	//this.line.position.y = sphere.position.y;
+	//this.line.position.z = sphere.position.z;
+
+	this.mesh = sphere;
+    }
+
+    this.update = function(){
+	this.rotation += this.rotation_rate;
+	this.mesh.position.x = this.parent.mesh.position.x + this.distance*Math.cos(this.rotation);
+	this.mesh.position.y = this.parent.mesh.position.y + this.distance*Math.atan(this.mesh.rotation.x)*Math.sin(this.rotation);
+	this.mesh.position.z = this.parent.mesh.position.z + this.distance*Math.sin(this.rotation);
+	
+	this.mesh.rotation.x = 0;
+	this.mesh.rotation.y += this.spin_rate;
+	this.mesh.rotation.x = this.tilt_angle;
+
+	//this.line.position.x = this.mesh.position.x;
+	//this.line.position.y = this.mesh.position.y;
+	//this.line.position.z = this.mesh.position.z;
+
+	//for(i = 0; i < this.moons.length; i++){
+	//    this.moons[i].update();
+        //}
+    }
+
+    this.addMoon = function(name, distance, radius, material){
+	moon = new Moon(name, this);
+	moon.init(distance,radius,material);
+	this.moons.push(moon);
+    }
+
+    this.addToScene = function(scene){
+	scene.addObject(this.mesh);
+	//scene.addObject(this.line);
+	//for(i = 0; i < this.moons.length; i++){
+	//    this.moons[i].addToScene(scene);
+	//}
+    }
+}
+	
+
+function SolarSystem(name){
+    this.name = name;
+    this.mesh = null;
+    this.light = null;
+    this.glow = null;
+    this.radius = 0;
+    this.planets = [];
+    this.rotation = 0;
+
+    this.init = function(position, radius, the_color){
+	
+	this.radius = radius;
+
+	var mat = new THREE.ParticleBasicMaterial( {
+	    color: 0xffff00,
+	    map: THREE.ImageUtils.loadTexture('images/sunmap.jpg'),
+	    blending: THREE.AdditiveBlending });
+	
+	sphere = new THREE.Sprite({ useScreenCoordinates: false, map: THREE.ImageUtils.loadTexture('images/sunsprite.jpg'), blending: THREE.AdditiveBlending });
+
+	sphere.scale.x = sphere.scale.y = sphere.scale.z = 0.005*radius
+
+	sphere.position.x = position[0];
+	sphere.position.y = position[1];
+	sphere.position.z = position[2];
+
+	this.light = new THREE.PointLight(0xffffff, .1);
+	this.light.position.x = position[0];
+	this.light.position.y = position[1];
+	this.light.position.z = position[2];
+
+	this.mesh = sphere;
+    }
+
+    this.addPlanet = function(name, distance, radius, material){
+	planet = new Planet(name, this);
+	planet.init(distance,radius,material);
+	this.planets.push(planet);
+    }
+
+    this.update = function(){
+	//console.log("in update");
+	for(i = 0; i < this.planets.length; i++){
+	    this.planets[i].update();
+	}
+    }
+
+    this.addToScene = function(scene){
+	//console.log("SS add to scene");
+	scene.addObject(this.mesh);
+	scene.addLight(this.light);
+	for(i = 0; i < this.planets.length; i++){
+	    console.log("index: " + i);
+	    this.planets[i].addToScene(scene);
+	}
+    }
+}
+    </script>
+
+<script type="text/javascript">
+if (!Detector.webgl) Detector.addGetWebGLMessage();
+
+var container, stats;
+
+var camera, scene, sceneStarGlow, renderer, solarsystems, composer;
+var particleLight, pointLight, lookat, viewchange, rand_vp;
+
+function init() {
+
+    viewchange = true;
+    rand_vp = 0;
+
+  container = document.getElementById("canvas-container");
+
+  camera = new THREE.Camera(45, 900 / 500, 1, 1000);
+  camera.position.x = 150;
+  camera.position.y = 30;
+  camera.position.z = 150;
+
+  scene = new THREE.Scene();
+  //sceneStarGlow = new THREE.Scene();
+
+  // Plane
+  line_material = new THREE.MeshBasicMaterial({
+    color: 0x0087BD,
+      map: THREE.ImageUtils.loadTexture('images/radial_gradient.jpg'),
+      opacity: 0.8,
+      blending: THREE.AdditiveBlending
+  }),
+    geometry = new THREE.PlaneGeometry(300,300,300,300);
+
+  var plane = new THREE.Mesh(geometry, line_material);
+
+    plane.position.y = -50;
+
+    plane.rotation.x = 3*Math.PI/2;
+
+  scene.addObject(plane);
+
+  map_material = new THREE.MeshBasicMaterial({
+      map: THREE.ImageUtils.loadTexture('images/starmap_2048.png'),
+      //opacity: 0.5,
+      blending: THREE.AdditiveBlending
+  }),
+    geometry = new THREE.SphereGeometry(500,32,16);
+
+  var starsphere = new THREE.Mesh(geometry, map_material);
+    starsphere.flipsided = true;
+    starsphere.scale.x = -1;
+
+  scene.addObject(starsphere);
+
+    solarsystems = [];
+
+    planetMats = [];
+
+    moonTex =  THREE.ImageUtils.loadTexture( 'images/moonmap1k.jpg');
+
+    planetMats.push(new THREE.MeshPhongMaterial({
+	map: THREE.ImageUtils.loadTexture('images/planet.jpg'),
+		ambient: 0x505050,
+		shading: THREE.SmoothShading
+    }));
+
+    planetMats.push(new THREE.MeshPhongMaterial({
+	map: THREE.ImageUtils.loadTexture('images/plutomap1k.jpg'),
+		ambient: 0x505050,
+		shading: THREE.SmoothShading
+    }));
+    
+    planetMats.push(new THREE.MeshPhongMaterial({
+		map: THREE.ImageUtils.loadTexture('images/neptunemap.jpg'),
+		ambient: 0x505050,
+		shading: THREE.SmoothShading
+    }));
+
+    planetMats.push(new THREE.MeshPhongMaterial({
+		map: THREE.ImageUtils.loadTexture('images/jupitermap.jpg'),
+		ambient: 0x505050,
+		shading: THREE.SmoothShading
+    }));
+
+    planetMats.push(new THREE.MeshPhongMaterial({
+		map: THREE.ImageUtils.loadTexture('images/mars_1k_color.jpg'),
+		ambient: 0x505050,
+		shading: THREE.SmoothShading
+    }));
+
+    planetMats.push(new THREE.MeshPhongMaterial({
+		map: THREE.ImageUtils.loadTexture('images/venusmap.jpg'),
+		ambient: 0x505050,
+		shading: THREE.SmoothShading
+    }));
+    
+    planetMats.push(new THREE.MeshPhongMaterial({
+		map: THREE.ImageUtils.loadTexture('images/mercurymap.jpg'),
+		ambient: 0x505050,
+		shading: THREE.SmoothShading
+    }));
+
+    planetMats.push (new THREE.MeshPhongMaterial({
+		map:moonTex,
+		ambient: 0x505050,
+		shading: THREE.SmoothShading
+    }));
+    
+    var sol;
+
+    for(i = 0; i < 1; i++){
+	for(j = 0; j < 1; j++){
+	    sol = new SolarSystem("sol");
+	    sun_size = 10+Math.floor(Math.random()*5);
+	    sol.init([100*i,0,100*j], sun_size, 0xffff00);
+	    last_plan_dist = sun_size;
+	    last_plan_size = 0;
+	    plan_num = 0;
+	    planet_size = 2 + Math.floor(Math.random()*25*(.2+(last_plan_dist+last_plan_size-sun_size)/((100.0-sun_size)/2)));
+	    while(last_plan_dist + last_plan_size + planet_size*2 + 1 < 100){
+		console.log("in while");
+		planet_dist = last_plan_dist+last_plan_size+planet_size+Math.floor(Math.random()*7);
+		sol.addPlanet("planet " + plan_num, planet_dist, planet_size, planetMats[Math.floor(Math.random()*7)]);
+		//moon_base_dist = Math.random()*(planet_size);
+		//for(k = 0; k < Math.floor(Math.random()*2); k++){
+		//    moon_size = planet_size*.1+Math.random()*.5;
+		//    moon_dist = planet_size+1+k+moon_base_dist;
+		//    sol.planets[plan_num].addMoon("Moon " + k, moon_dist, moon_size, planetMats[Math.floor(Math.random()*7)]);
+		//}
+		last_plan_size = planet_size;
+		last_plan_dist = planet_dist
+		plan_num += 1;
+	    }
+	    solarsystems.push(sol);
+	}
+    }
+
+    console.log("done");
+
+    solarsystems[0].addToScene(scene);
+
+    lookat = solarsystems[0];
+
+    console.log("foo");
+
+  // Lights
+  scene.addLight(new THREE.AmbientLight(0xffffff));
+
+  renderer = new THREE.WebGLRenderer({ antialias: true });
+  //renderer.autoClear = false;
+  renderer.setSize(900, 500);
+
+    //var renderModel = new THREE.RenderPass( scene, camera );
+    //var effectBloom = new THREE.BloomPass(1);
+    //var effectScreen = new THREE.ShaderPass( THREE.ShaderExtras[ "screen" ] );
+    //var convoPass = new THREE.ShaderPass( THREE.ShaderExtras[ "convolution" ] );
+
+    //effectScreen.renderToScreen = true;
+
+    //composer = new THREE.EffectComposer( renderer );
+    
+    //composer.addPass( renderModel );
+    //composer.addPass( effectBloom );
+    //composer.addPass( convoPass );
+    //composer.addPass( effectScreen );
+
+  container.appendChild(renderer.domElement);
+    i = 0;
+
+    dropdown = document.getElementById("ss_dropdown");
+    star = document.createElement("li");
+    link = document.createElement("a");
+    link.setAttribute("href", "#");
+    link.setAttribute("onclick", "lookat = solarsystems[0]; viewchange = true;");
+    link.appendChild(document.createTextNode(solarsystems[0].name));
+    star.appendChild(link);
+    dropdown.appendChild(star);
+
+    divider =  document.createElement("li");
+    divider.setAttribute("class", "divider");
+    dropdown.appendChild(divider);
+
+    console.log(solarsystems[0].planets.length);
+
+    for(i = 0; i < solarsystems[0].planets.length; i++){
+	planet = document.createElement("li");
+	link = document.createElement("a");
+	link.setAttribute("href", "#");
+	link.setAttribute("onclick", "lookat = solarsystems[0].planets[" + i + "]; viewchange = true;");
+	link.appendChild(document.createTextNode(solarsystems[0].planets[i].name));
+	planet.appendChild(link);
+	dropdown.appendChild(planet);
+    }
+
+    console.log("animate");
+  animate();
+}
+
+function generateTexture() {
+
+  var canvas = document.createElement('canvas');
+  canvas.width = 256;
+  canvas.height = 256;
+
+  var context = canvas.getContext('2d');
+  var image = context.getImageData(0, 0, 256, 256);
+
+  var x = 0,
+    y = 0;
+
+  for (var i = 0, j = 0, l = image.data.length; i < l; i += 4, j++) {
+
+    x = j % 256;
+    y = x == 0 ? y + 1 : y;
+
+    image.data[i + 2] = Math.floor(x ^ y);
+    image.data[i + 3] = 255;
+
+  }
+
+  context.putImageData(image, 0, 0);
+
+  return canvas;
+
+}
+
+//
+
+function animate() {
+
+  requestAnimationFrame(animate);
+
+  render();
+}
+
+function render() {
+
+  var timer = new Date().getTime() * 0.0001;
+
+  //camera.position.x = Math.cos(timer/2) * 150;
+  //camera.position.z = Math.sin(timer/2) * 150;
+
+    solarsystems[0].update();
+    //solarsystems[1].update();
+    //solarsystems[2].update();
+    //solarsystems[3].update();
+    //solarsystems[4].update();
+    //solarsystems[5].update();
+    //solarsystems[6].update();
+    //solarsystems[7].update();
+    //solarsystems[8].update();
+
+  //Particlelight.position.x = Math.sin(timer * 7) * 300;
+  //particleLight.position.y = Math.cos(timer * 5) * 400;
+  //particleLight.position.z = Math.cos(timer * 3) * 300;
+
+  //pointLight.position.x = particleLight.position.x;
+  //pointLight.position.y = particleLight.position.y;
+  //pointLight.position.z = particleLight.position.z;
+
+    if(viewchange){
+	rand_vp = Math.PI - Math.random()*2*Math.PI;
+	viewchange = false;
+    }
+    if(lookat instanceof SolarSystem){
+	camera.position.x = 0;
+	camera.position.y = 50;
+	camera.position.z = 10+lookat.planets[lookat.planets.length-1].distance+lookat.planets[lookat.planets.length-1].radius;
+    } else {
+    
+	if(rand_vp < 0){
+	    camera.position.x = lookat.mesh.position.x-5*lookat.radius*Math.cos(lookat.rotation+Math.cos(rand_vp));
+	    camera.position.y = lookat.mesh.position.y;
+	    camera.position.z = lookat.mesh.position.z-5*lookat.radius*Math.sin(lookat.rotation+Math.cos(rand_vp));
+	} else {
+	    camera.position.x = lookat.mesh.position.x+5*lookat.radius*Math.cos(lookat.rotation+Math.cos(rand_vp));
+	    camera.position.y = lookat.mesh.position.y;
+	    camera.position.z = lookat.mesh.position.z+5*lookat.radius*Math.sin(lookat.rotation+Math.cos(rand_vp));
+	}
+    }
+
+    camera.target = lookat.mesh;
+
+    //renderer.clear();
+    //composer.render( 0.01 );
+    renderer.render(scene, camera);
+    //renderer.render(sceneStarGlow, camera);
+
+}
+</script>
+
+</head>
+<body style="padding-top: 40px;" onload="init()">
+  <!--<div id="framerate" style="position:absolute; z-index: 100; left: 1020px; top: 50px; background-color: #000; opacity: 0.python -m SimpleHTTPServer5;height: 30px; width: 130px; border-radius: 5px; -moz-border-radius5px;-webkit-border-radius:5px;border: 1px solid #fff;">
+    <div id="debug" style="padding: 5px"></div>
+  </div>-->
+  <div class="topbar-wrapper" style="z-index: 5;">
+    <div class="topbar">
+      <div class="topbar-inner">
+	<div class="container">
+          <h3><a href="#">Caelibellum</a></h3>
+          <ul class="nav">
+            <li class="active"><a href="#">Overview</a></li>
+            <!--//<li><a href="#">Economy</a></li>
+            //<li><a href="#">Military</a></li>
+            //<li><a href="#">Scouting</a></li>
+	    //<li><a href="#">Diplomacy</a></li>-->
+          </ul>
+          <ul class="nav secondary-nav">
+            <li class="dropdown">
+              <a href="#" class="dropdown-toggle">LookAt</a>
+                <ul id="ss_dropdown" class="dropdown-menu">
+              </ul>
+            </li>
+          </ul>
+        </div>
+      </div><!-- /topbar-inner -->
+    </div><!-- /topbar -->
+  </div><!-- /topbar-wrapper -->
+  <div class="container-fluid">
+    <div class="sidebar">
+      <!--<h1>Status</h1>
+      <ul>
+	<l1>Units: 1</li>-->
+    </div>
+    <div class="content">
+      <div class="row">
+        <div class="span16">
+	  <div style="width:900px;margin:auto;position:relative;background-color:#000;" id="canvas-container">
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
