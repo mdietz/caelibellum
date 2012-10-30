@@ -8,12 +8,12 @@
 <script type="text/javascript" src="static/RequestAnimationFrame.js"></script> 
 <script type="text/javascript" src="static/Detector.js"></script>
 <script type="text/javascript" src="static/RenderPass.js"></script>
-    <script type="text/javascript" src="static/BloomPass.js"></script>
-    <script type="text/javascript" src="static/FilmPass.js"></script>
-     <script type="text/javascript" src="static/ShaderExtras.js"></script>
-    <script type="text/javascript" src="static/EffectComposer.js"></script>
-     <script type="text/javascript" src="static/ShaderPass.js"></script>
-     <script type="text/javascript" src="static/MaskPass.js"></script>
+<script type="text/javascript" src="static/BloomPass.js"></script>
+<script type="text/javascript" src="static/FilmPass.js"></script>
+<script type="text/javascript" src="static/ShaderExtras.js"></script>
+<script type="text/javascript" src="static/EffectComposer.js"></script>
+<script type="text/javascript" src="static/ShaderPass.js"></script>
+<script type="text/javascript" src="static/MaskPass.js"></script>
 
 
 <link rel="stylesheet" type="text/css" href="static/bootstrap-1.2.0.min.css">
@@ -186,7 +186,7 @@ function SolarSystem(name){
 	    map: THREE.ImageUtils.loadTexture('images/sunmap.jpg'),
 	    blending: THREE.AdditiveBlending });
 	
-	sphere = new THREE.Sprite({ useScreenCoordinates: false, map: THREE.ImageUtils.loadTexture('images/sunsprite.jpg'), blending: THREE.AdditiveBlending });
+	sphere = new THREE.Sprite({ useScreenCoordinates: false, map: THREE.ImageUtils.loadTexture('static/images/sunsprite.jpg'), blending: THREE.AdditiveBlending });
 
 	sphere.scale.x = sphere.scale.y = sphere.scale.z = 0.005*radius
 
@@ -253,7 +253,7 @@ function init() {
   // Plane
   line_material = new THREE.MeshBasicMaterial({
     color: 0x0087BD,
-      map: THREE.ImageUtils.loadTexture('images/radial_gradient.jpg'),
+      map: THREE.ImageUtils.loadTexture('static/images/radial_gradient.jpg'),
       opacity: 0.8,
       blending: THREE.AdditiveBlending
   }),
@@ -268,7 +268,7 @@ function init() {
   scene.addObject(plane);
 
   map_material = new THREE.MeshBasicMaterial({
-      map: THREE.ImageUtils.loadTexture('images/starmap_2048.png'),
+      map: THREE.ImageUtils.loadTexture('static/images/starmap_2048.png'),
       //opacity: 0.5,
       blending: THREE.AdditiveBlending
   }),
@@ -284,46 +284,46 @@ function init() {
 
     planetMats = [];
 
-    moonTex =  THREE.ImageUtils.loadTexture( 'images/moonmap1k.jpg');
+    moonTex =  THREE.ImageUtils.loadTexture('static/images/moonmap1k.jpg');
 
     planetMats.push(new THREE.MeshPhongMaterial({
-	map: THREE.ImageUtils.loadTexture('images/planet.jpg'),
+	map: THREE.ImageUtils.loadTexture('static/images/planet.jpg'),
 		ambient: 0x505050,
 		shading: THREE.SmoothShading
     }));
 
     planetMats.push(new THREE.MeshPhongMaterial({
-	map: THREE.ImageUtils.loadTexture('images/plutomap1k.jpg'),
+	map: THREE.ImageUtils.loadTexture('static/images/plutomap1k.jpg'),
 		ambient: 0x505050,
 		shading: THREE.SmoothShading
     }));
     
     planetMats.push(new THREE.MeshPhongMaterial({
-		map: THREE.ImageUtils.loadTexture('images/neptunemap.jpg'),
+		map: THREE.ImageUtils.loadTexture('static/images/neptunemap.jpg'),
 		ambient: 0x505050,
 		shading: THREE.SmoothShading
     }));
 
     planetMats.push(new THREE.MeshPhongMaterial({
-		map: THREE.ImageUtils.loadTexture('images/jupitermap.jpg'),
+		map: THREE.ImageUtils.loadTexture('static/images/jupitermap.jpg'),
 		ambient: 0x505050,
 		shading: THREE.SmoothShading
     }));
 
     planetMats.push(new THREE.MeshPhongMaterial({
-		map: THREE.ImageUtils.loadTexture('images/mars_1k_color.jpg'),
+		map: THREE.ImageUtils.loadTexture('static/images/mars_1k_color.jpg'),
 		ambient: 0x505050,
 		shading: THREE.SmoothShading
     }));
 
     planetMats.push(new THREE.MeshPhongMaterial({
-		map: THREE.ImageUtils.loadTexture('images/venusmap.jpg'),
+		map: THREE.ImageUtils.loadTexture('static/images/venusmap.jpg'),
 		ambient: 0x505050,
 		shading: THREE.SmoothShading
     }));
     
     planetMats.push(new THREE.MeshPhongMaterial({
-		map: THREE.ImageUtils.loadTexture('images/mercurymap.jpg'),
+		map: THREE.ImageUtils.loadTexture('static/images/mercurymap.jpg'),
 		ambient: 0x505050,
 		shading: THREE.SmoothShading
     }));
